@@ -12,6 +12,8 @@ import AgendaPsicologo from "./pages/AgendaPsicologo";
 import SessionPage from "./pages/SessionPage";
 import Videoconferencia from "./pages/Videoconferencia";
 
+import CompanyList from "./pages/Company/CompanyList";
+import CompanyForm from "./pages/Company/CompanyForm";
 import MasterPage from "./layout/MasterPage"; // seu layout existente
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
@@ -73,6 +75,36 @@ export default function App() {
               <ProtectedRoute>
                 <MasterPage>
                   <Videoconferencia clientId="CLIENT-EXEMPLO" clientName="Paciente Exemplo" />
+                </MasterPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/company"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <MasterPage>
+                  <CompanyList />
+                </MasterPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/companies/new"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <MasterPage>
+                  <CompanyForm />
+                </MasterPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/companies/:id/edit"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <MasterPage>
+                  <CompanyForm />
                 </MasterPage>
               </ProtectedRoute>
             }
