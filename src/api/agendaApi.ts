@@ -1,6 +1,7 @@
 // src/api/agendaApi.ts
 import { axiosInstance } from "../config/axiosConfig";
 import { apiEndpoint } from "../config/apiConfig";
+import { ApiResponseDto } from "../config/apiDtos";
 
 export type AgendaSlotDto = {
   id: string;

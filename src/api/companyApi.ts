@@ -2,28 +2,53 @@
 import { axiosInstance } from "../config/axiosConfig";
 import { apiEndpoint } from "../config/apiConfig";
 
-const API_URL = apiEndpoint("/api/company");
-
-export type ApiResponseDto<T = any> = {
-  hasSuccess: boolean;
-  messageFriendly?: string;
-  messageTechnica?: string;
-  payload: T;
-  statusCode: number;
-};
-
 export type CompanyDto = {
   id: string;
   name: string;
   cnpj: string;
 };
 
-export async function getCompanies(): Promise<ApiResponseDto<CompanyDto[]>> {
-  const { data } = await axiosInstance.get<ApiResponseDto<CompanyDto[]>>(API_URL);
+export type ApiResponseDto<T> = {
+  hasSuccess: boolean;
+  messageFriendly: string;
+  messageTechnica: string;
+  payload: T;
+  statusCode: number;
+};
+
+export type ApiResponsePagedDto<T> = {
+  totalRecords: number;
+  pageSize: number;
+  currentPage: number;
+  totalPages: number;
+  hasSuccess: boolean;
+  messageFriendly: string;
+  messageTechnica: string;
+  payload: T[];
+  statusCode: number;
+};
+
+// Observação: o GET retorna um array contendo um único objeto com paginação
+export async function getCompanies() {
+  const { data } = await axiosInstance.get<ApiResponsePagedDto<CompanyDto>[]>(apiEndpoint("/api/Company"));
+  // Normaliza: se vier array com um item, usa esse item; caso mude para objeto único, também funciona
+  const normalized = Array.isArray(data) ? (data[0] ?? {
+    totalRecords: 0, pageSize: 10, currentPage: 1, totalPages: 0, hasSuccess: true, messageFriendly: "", messageTechnica: "", payload: [], statusCode: 200
+  }) : (data as any);
+  return normalized as ApiResponsePagedDto<CompanyDto>;
+}
+
+export async function createCompany(body: { name: string; cnpj: string }) {
+  const { data } = await axiosInstance.post<ApiResponseDto<string>>(apiEndpoint("/api/Company"), body);
   return data;
 }
 
-export async function createCompany(name: string, cnpj: string): Promise<ApiResponseDto<CompanyDto>> {
-  const { data } = await axiosInstance.post<ApiResponseDto<CompanyDto>>(API_URL, { name, cnpj });
+export async function updateCompany(id: string, body: { name: string; cnpj: string }) {
+  const { data } = await axiosInstance.put<ApiResponseDto<string>>(apiEndpoint(`/api/Company/${id}`), body);
+  return data;
+}
+
+export async function deleteCompany(id: string) {
+  const { data } = await axiosInstance.delete<ApiResponseDto<{ deletedId: string }>>(apiEndpoint(`/api/Company/${id}`));
   return data;
 }
