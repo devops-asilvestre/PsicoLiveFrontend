@@ -1,31 +1,11 @@
 // src/api/companyApi.ts
 import { axiosInstance } from "../config/axiosConfig";
 import { apiEndpoint } from "../config/apiConfig";
-
+import { ApiResponseDto, ApiResponsePagedDto } from "../types/api";
 export type CompanyDto = {
   id: string;
   name: string;
   cnpj: string;
-};
-
-export type ApiResponseDto<T> = {
-  hasSuccess: boolean;
-  messageFriendly: string;
-  messageTechnica: string;
-  payload: T;
-  statusCode: number;
-};
-
-export type ApiResponsePagedDto<T> = {
-  totalRecords: number;
-  pageSize: number;
-  currentPage: number;
-  totalPages: number;
-  hasSuccess: boolean;
-  messageFriendly: string;
-  messageTechnica: string;
-  payload: T[];
-  statusCode: number;
 };
 
 // Observação: o GET retorna um array contendo um único objeto com paginação
