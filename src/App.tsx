@@ -14,6 +14,10 @@ import Videoconferencia from "./pages/Videoconferencia";
 
 import CompanyList from "./pages/Company/CompanyList";
 import CompanyForm from "./pages/Company/CompanyForm";
+
+import UserList from "./pages/User/UserList";
+import UserForm from "./pages/User/UserForm";
+
 import MasterPage from "./layout/MasterPage"; // seu layout existente
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
@@ -105,6 +109,36 @@ export default function App() {
               <ProtectedRoute role="ADMIN">
                 <MasterPage>
                   <CompanyForm />
+                </MasterPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/psicologos"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <MasterPage>
+                  <UserList />
+                </MasterPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/psicologos/new"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <MasterPage>
+                  <UserForm />
+                </MasterPage>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/psicologos/:id/edit"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <MasterPage>
+                  <UserForm />
                 </MasterPage>
               </ProtectedRoute>
             }
