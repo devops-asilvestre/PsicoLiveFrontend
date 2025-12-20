@@ -1,6 +1,5 @@
 // src/pages/Company/CompanyList.tsx
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { useAuth } from "../../context/AuthContext";
 import { CompanyDto, getCompanies, deleteCompany } from "../../api/companyApi";
 import { useNavigate } from "react-router-dom";
@@ -26,20 +25,23 @@ export default function CompanyList() {
     try {
       setLoading(true);
       setError(null);
-      const res = await getCompanies();
+
+      // chamada ao backend com paginação
+      const res = await getCompanies(pageSize, page);
       if (res.hasSuccess) {
         let data = res.payload || [];
 
-        // filtro de busca
+        // filtro de busca (aplicado no frontend)
         if (search.trim()) {
           const term = search.toLowerCase();
-          data = data.filter(c =>
-            c.name.toLowerCase().includes(term) ||
-            c.cnpj.toLowerCase().includes(term)
+          data = data.filter(
+            (c) =>
+              c.name.toLowerCase().includes(term) ||
+              c.cnpj.toLowerCase().includes(term)
           );
         }
 
-        // ordenação
+        // ordenação (aplicada no frontend)
         if (sortColumn) {
           data = [...data].sort((a, b) => {
             const valA = a[sortColumn].toLowerCase();
@@ -50,13 +52,9 @@ export default function CompanyList() {
           });
         }
 
-        // paginação local
-        const total = data.length;
-        const totalPagesCalc = Math.ceil(total / pageSize) || 1;
-        setTotalPages(totalPagesCalc);
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        setCompanies(data.slice(start, end));
+        // paginação agora vem do backend
+        setCompanies(data);
+        setTotalPages(res.totalPages || 1);
       } else {
         setError(res.messageFriendly || "Falha ao listar empresas.");
       }
@@ -73,13 +71,12 @@ export default function CompanyList() {
 
   function handleSort(column: "name" | "cnpj") {
     if (sortColumn === column) {
-      // alterna direção
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortColumn(column);
       setSortDirection("asc");
     }
-    setPage(1); // volta para primeira página
+    setPage(1);
   }
 
   if (!isAdmin) {
@@ -94,12 +91,19 @@ export default function CompanyList() {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h3>Companies</h3>
-        <button className="btn btn-success" onClick={() => navigate("/companies/new")}>
+        <button
+          className="btn btn-success"
+          onClick={() => navigate("/companies/new")}
+        >
           Novo Registro
         </button>
       </div>
 
-      {error && <div className="alert alert-danger" role="alert">{error}</div>}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
 
       {/* Campo de busca + seleção de pageSize */}
       <div className="mb-3 d-flex justify-content-between">
@@ -108,14 +112,20 @@ export default function CompanyList() {
           className="form-control w-50"
           placeholder="Buscar por nome ou CNPJ..."
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
         />
         <div className="d-flex align-items-center">
           <label className="me-2">Registros por página:</label>
           <select
             className="form-select w-auto"
             value={pageSize}
-            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
           >
             <option value={5}>5</option>
             <option value={10}>10</option>
@@ -133,19 +143,23 @@ export default function CompanyList() {
                 onClick={() => handleSort("name")}
                 style={{ cursor: "pointer" }}
               >
-                Nome {sortColumn === "name" && (sortDirection === "asc" ? "▲" : "▼")}
+                Nome{" "}
+                {sortColumn === "name" &&
+                  (sortDirection === "asc" ? "▲" : "▼")}
               </th>
               <th
                 onClick={() => handleSort("cnpj")}
                 style={{ cursor: "pointer" }}
               >
-                CNPJ {sortColumn === "cnpj" && (sortDirection === "asc" ? "▲" : "▼")}
+                CNPJ{" "}
+                {sortColumn === "cnpj" &&
+                  (sortDirection === "asc" ? "▲" : "▼")}
               </th>
               <th style={{ width: 220 }}>Ações</th>
             </tr>
           </thead>
           <tbody>
-            {companies.map(c => (
+            {companies.map((c) => (
               <tr key={c.id}>
                 <td>{c.name}</td>
                 <td>{c.cnpj}</td>
@@ -160,7 +174,8 @@ export default function CompanyList() {
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={async () => {
-                        if (!window.confirm(`Excluir empresa "${c.name}"?`)) return;
+                        if (!window.confirm(`Excluir empresa "${c.name}"?`))
+                          return;
                         try {
                           setLoading(true);
                           const res = await deleteCompany(c.id);
@@ -183,7 +198,9 @@ export default function CompanyList() {
             ))}
             {companies.length === 0 && !loading && (
               <tr>
-                <td colSpan={3} className="text-center text-muted">Nenhuma empresa encontrada.</td>
+                <td colSpan={3} className="text-center text-muted">
+                  Nenhuma empresa encontrada.
+                </td>
               </tr>
             )}
           </tbody>
@@ -194,15 +211,24 @@ export default function CompanyList() {
       <nav aria-label="Navegação de página">
         <ul className="pagination justify-content-center">
           <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-            <button className="page-link" onClick={() => setPage(page - 1)}>Anterior</button>
+            <button className="page-link" onClick={() => setPage(page - 1)}>
+              Anterior
+            </button>
           </li>
           {Array.from({ length: totalPages }, (_, i) => (
-            <li key={i} className={`page-item ${page === i + 1 ? "active" : ""}`}>
-              <button className="page-link" onClick={() => setPage(i + 1)}>{i + 1}</button>
+            <li
+              key={i}
+              className={`page-item ${page === i + 1 ? "active" : ""}`}
+            >
+              <button className="page-link" onClick={() => setPage(i + 1)}>
+                {i + 1}
+              </button>
             </li>
           ))}
           <li className={`page-item ${page === totalPages ? "disabled" : ""}`}>
-            <button className="page-link" onClick={() => setPage(page + 1)}>Próximo</button>
+            <button className="page-link" onClick={() => setPage(page + 1)}>
+              Próximo
+            </button>
           </li>
         </ul>
       </nav>

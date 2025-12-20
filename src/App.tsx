@@ -1,12 +1,10 @@
 // src/App.tsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage"; // caso exista
-import DashboardPage from "./pages/DashboardPage"; // seu dashboard atual
+import DashboardPage from "./pages/DashboardPage";
 import MenuPage from "./pages/MenuPage";
 import AgendaPsicologo from "./pages/AgendaPsicologo";
 import SessionPage from "./pages/SessionPage";
@@ -15,10 +13,11 @@ import Videoconferencia from "./pages/Videoconferencia";
 import CompanyList from "./pages/Company/CompanyList";
 import CompanyForm from "./pages/Company/CompanyForm";
 
-import UserList from "./pages/User/UserList";
-import UserForm from "./pages/User/UserForm";
+import UserList from "./pages/Psicologo/UserList";
+import UserForm from "./pages/Psicologo/UserForm";
+import UserPage from "./pages/Psicologo/UserPage"; // novo componente inteligente
 
-import MasterPage from "./layout/MasterPage"; // seu layout existente
+import MasterPage from "./layout/MasterPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -83,6 +82,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Companies */}
           <Route
             path="/company"
             element={
@@ -113,16 +114,20 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Users (ADMIN vê lista, PSICOLOGO vê seu próprio formulário) */}
           <Route
             path="/psicologos"
             element={
-              <ProtectedRoute role="ADMIN">
+              <ProtectedRoute role="ADMIN,PSICOLOGO">
                 <MasterPage>
-                  <UserList />
+                  <UserPage />
                 </MasterPage>
               </ProtectedRoute>
             }
           />
+
+          {/* Rotas específicas para ADMIN */}
           <Route
             path="/psicologos/new"
             element={
